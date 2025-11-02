@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrooveVortex Knižnica: Statické Dáta</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Používame font Inter pre moderný vzhľad -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=100..900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6366f1; /* Indigo-500 */
+            --accent-color: #a855f7;  /* Purple-500 (pre neón) */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117; /* Veľmi tmavé pozadie pre futuristický pocit */
+            color: #e5e7eb; /* Svetlý text */
+            overflow-x: hidden;
+        }
+        .vortex-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            border: 1px solid rgba(168, 85, 247, 0.2); /* Jemný okraj */
+        }
+        .vortex-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(168, 85, 247, 0.4), 0 0 15px rgba(168, 85, 247, 0.7);
+        }
+        .neon-text {
+            text-shadow: 0 0 5px var(--accent-color), 0 0 10px var(--accent-color);
+        }
+        .animated-bg {
+            background: linear-gradient(-45deg, #111827, #1f2937, #111827);
+            background-size: 400% 400%;
+            animation: gradient-shift 15s ease infinite;
+        }
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        /* Custom scrollbar pre futuristický vzhľad */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d8b4fe;
+        }
+    </style>
+</head>
+<body class="animated-bg min-h-screen">
+
+    <!-- PRIHLASOVACÍ/REGISTRAČNÝ MODAL -->
+    <div id="login-modal" class="fixed inset-0 bg-gray-900 z-[110] flex items-center justify-center p-4">
+        <div class="bg-gray-800 p-8 rounded-xl shadow-2xl max-w-sm w-full border border-purple-500/50">
+            <!-- Taby pre prepínanie medzi Prihlásením a Registráciou -->
+            <div class="flex mb-6 border-b border-gray-700">
+                <button id="tab-login" onclick="showForm('login')" class="w-1/2 py-2 text-lg font-bold border-b-2 border-purple-500 text-purple-400 transition">
+                    Prihlásenie
+                </button>
+                <button id="tab-register" onclick="showForm('register')" class="w-1/2 py-2 text-lg font-bold text-gray-400 hover:text-purple-400 transition border-b-2 border-transparent">
+                    Registrácia
+                </button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="form-login">
+                <h2 class="text-2xl font-bold mb-4 text-center text-purple-400 neon-text">
+                    Prihlásenie do Vortexu
+                </h2>
+                <p class="text-xs text-gray-400 text-center mb-6">
+                    Použite hardcoded demo účet, alebo sa <span onclick="showForm('register')" class="text-purple-400 font-medium cursor-pointer hover:underline">zaregistrujte.</span>
+                    <span class="font-mono text-indigo-400 block mt-1">Demo: GrooveVortex / password123</span>
+                </p>
+                
+                <form id="login-form" onsubmit="handleLogin(event)">
+                    <div class="mb-4">
+                        <label for="login-nickname" class="block text-sm font-medium text-gray-300 mb-1">Umelecký Nickname</label>
+                        <input type="text" id="login-nickname" required class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" value="GrooveVortex">
+                    </div>
+                    <div class="mb-6">
+                        <label for="login-password" class="block text-sm font-medium text-gray-300 mb-1">Heslo</label>
+                        <input type="password" id="login-password" required class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" value="password123">
+                    </div>
+                    <button type="submit" class="w-full px-4 py-2 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-500 transition duration-300">
+                        VSTÚPIŤ DO KNIŽNICE
+                    </button>
+                </form>
+            </div>
+
+            <!-- Registration Form (Default hidden) -->
+            <div id="form-register" class="hidden">
+                 <h2 class="text-2xl font-bold mb-4 text-center text-indigo-400 neon-text">
+                    Registrácia Nového Nicku
+                </h2>
+                <p class="text-xs text-gray-400 text-center mb-6">
+                    Zaregistrujte si svoj unikátny umelecký Nickname (3-20 znakov, min. 6 znakové heslo).
+                </p>
+                <form id="register-form" onsubmit="handleRegister(event)">
+                    <div class="mb-4">
+                        <label for="reg-nickname" class="block text-sm font-medium text-gray-300 mb-1">Umelecký Nickname</label>
+                        <input type="text" id="reg-nickname" required minlength="3" maxlength="20" class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="mb-6">
+                        <label for="reg-password" class="block text-sm font-medium text-gray-300 mb-1">Heslo</label>
+                        <input type="password" id="reg-password" required minlength="6" class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <button type="submit" class="w-full px-4 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-500 transition duration-300">
+                        ZAREGISTROVAŤ A PRIHLÁSIŤ
+                    </button>
+                </form>
+            </div>
+            
+            <p id="login-message" class="text-center text-gray-400 mt-4 h-5"></p>
+        </div>
+    </div>
+
+    <!-- HLAVNÝ OBSAH APLIKÁCIE (Skrytý, kým nie je prihlásený) -->
+    <div id="main-content" class="hidden">
+        
+        <!-- Hlavná Navigácia (Top Bar) -->
+        <header class="sticky top-0 z-50 bg-gray-900/90 backdrop-blur-md shadow-lg border-b border-purple-500/30">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <!-- Logo/Názov -->
+                    <a href="#" class="flex-shrink-0 text-2xl font-extrabold tracking-widest text-white neon-text">
+                        <span class="text-purple-400">GROOVE</span>VORTEX
+                    </a>
+                    <!-- Navigačné Linky (pre single-page) -->
+                    <nav class="hidden md:flex space-x-8">
+                        <a href="#katalog" class="text-gray-300 hover:text-purple-400 transition duration-300 font-medium">Katalóg</a>
+                        <a href="#future-hub" class="text-gray-300 hover:text-purple-400 transition duration-300 font-medium">Statický Status</a>
+                    </nav>
+                    <!-- Zobrazuje status prihlásenia -->
+                    <div id="header-status" class="text-xs text-gray-500 font-mono flex items-center">
+                        <!-- Obsah bude nastavený JavaScriptom v renderApp(nickname) -->
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+            <!-- Sekcia: Magické Predstavenie (Hero) -->
+            <section id="hero" class="text-center py-20 mb-16 border-b border-purple-500/20">
+                <h1 class="text-6xl font-black mb-4 tracking-tight leading-tight">
+                    Vitajte v <span class="neon-text text-purple-400">Knižnici GrooveVortex</span>
+                </h1>
+                <p class="text-xl text-gray-400 max-w-3xl mx-auto mb-8">
+                    Prehliadate zoznam hudobných stôp, ktoré sú pevne definované v HTML kóde.
+                </p>
+                <button onclick="scrollToSection('katalog')" class="px-8 py-3 bg-indigo-600 text-white font-bold rounded-full text-lg shadow-indigo-500/50 shadow-2xl hover:bg-indigo-500 transition duration-300 transform hover:rotate-1 hover:scale-105">
+                    Zobraziť Statické Stopy
+                </button>
+            </section>
+
+
+            <!-- Sekcia: Katalóg Hudby (Main Content) -->
+            <section id="katalog" class="py-12 mt-16">
+                <h2 class="text-4xl font-bold mb-10 text-center neon-text text-purple-400">
+                    Katalóg Statických Hudobných Stôp
+                </h2>
+
+                <!-- Grid pre Hudobné Karty -->
+                <div id="music-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    <p id="loading-message" class="col-span-full text-center text-gray-400">Načítavam statické stopy...</p>
+                </div>
+            </section>
+
+            <!-- Sekcia: Future Hub (Statický Analytický Panel) -->
+            <section id="future-hub" class="py-16 mt-16 bg-gray-800/50 rounded-xl p-8 border border-indigo-400/30">
+                <h2 class="text-3xl font-bold mb-6 text-center text-indigo-400">
+                    Statický Status: Analytický Panel
+                </h2>
+                <div class="grid md:grid-cols-3 gap-6 text-center">
+                    <div class="p-6 bg-gray-900 rounded-lg shadow-xl">
+                        <p class="text-5xl font-extrabold text-purple-400 neon-text" id="track-count">7</p>
+                        <p class="text-gray-400 mt-2">Definovaných Stôp</p>
+                    </div>
+                    <div class="p-6 bg-gray-900 rounded-lg shadow-xl">
+                        <p class="text-5xl font-extrabold text-purple-400 neon-text">100%</p>
+                        <p class="text-gray-400 mt-2">Dátová Konzistencia</p>
+                    </div>
+                    <div class="p-6 bg-gray-900 rounded-lg shadow-xl">
+                        <p class="text-5xl font-extrabold text-purple-400 neon-text">KÓD</p>
+                        <p class="text-gray-400 mt-2">Typ Uloženia</p>
+                    </div>
+                </div>
+                <p class="text-center text-sm text-gray-500 mt-8">
+                    *Dáta sú statické a nemôžu byť zmenené počas behu aplikácie. Ak chcete zmeniť zoznam, musíte upraviť kód.
+                </p>
+            </section>
+
+        </main>
+
+        <!-- Pätka (Footer) -->
+        <footer id="kontakt" class="bg-gray-900/80 mt-20 py-10 border-t border-purple-500/30">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <p class="text-gray-400 mb-4">
+                    © 2025 GrooveVortex Knižnica. Všetky práva vyhradené pre budúcnosť.
+                </p>
+            </div>
+        </footer>
+    </div>
+
+
+    <!-- MODAL: Detail Skladby (Skrytý) -->
+    <div id="detail-modal" class="fixed inset-0 bg-black bg-opacity-75 z-[100] hidden flex items-center justify-center p-4" onclick="closeModal()">
+        <div class="bg-gray-900 p-8 rounded-xl shadow-2xl max-w-lg w-full transform transition-all duration-300 scale-95" onclick="event.stopPropagation()">
+            <h3 class="text-3xl font-bold mb-4 text-purple-400 neon-text" id="modal-title"></h3>
+            <p class="text-gray-400 mb-6" id="modal-artist"></p>
+            
+            <!-- Simulované detaily pre futuristickú atmosféru (pretože ukladáme iba názov/interpret) -->
+            <div id="modal-description"></div>
+
+            <!-- EXPLICITNÁ INFORMÁCIA O OBMEDZENÍ PREHRÁVANIA -->
+            <div class="mt-8 p-3 bg-gray-800 border border-red-500/50 rounded-lg text-center">
+                <p class="text-red-400 font-semibold text-sm">
+                    POZOR: Táto knižnica je len na prehliadanie názvov. Prehrávanie hudobných stôp nie je dostupné.
+                </p>
+            </div>
+            
+            <button onclick="closeModal()" class="mt-8 px-5 py-2 w-full bg-purple-600 text-white rounded-lg hover:bg-purple-500 transition duration-300">
+                Zavrieť Zobrazenie Stopy
+            </button>
+        </div>
+    </div>
+
+    <!-- Aplikačná Logika (JavaScript Array a Prihlásenie) -->
+    <script>
+        // Globálna premenná pre ukladanie dát - staticky definovaná v kóde
+        let musicData = [
+            // PRIDAJTE SVOJE NAZVY SEM
+            { id: '7', title: 'Firework', artist: 'GrooveVortex, Sam Smith, Robert Pattinson', createdAt: Date.now() + 2 }, 
+            { id: '6', title: 'Mr. Bean: Unmade – BoosingBassTV x GrooveVortex [Bass Fusion]', artist: 'BoosingBassTV x GrooveVortex', createdAt: Date.now() + 1 }, 
+            { id: '1', title: 'Cybernetic Dreams', artist: 'Neon Synth', createdAt: Date.now() - 86400000 * 3 }, 
+            { id: '2', title: 'Gravity Well', artist: 'Cosmic Harmonics', createdAt: Date.now() - 86400000 * 1 },
+            { id: '3', title: 'Starlight Drift', artist: 'Aura Nova', createdAt: Date.now() - 86400000 * 7 },
+            { id: '4', title: 'Echoes of Andromeda', artist: 'Futurebound', createdAt: Date.now() },
+            { id: '5', title: 'Vortex Groove', artist: 'The Code Breaker', createdAt: Date.now() - 86400000 * 5 }
+        ];
+
+        // Premenná pre ukladanie všetkých používateľov (hardcoded + registrovaní)
+        let ALL_USERS = []; 
+
+        /**
+         * Načíta uložených používateľov z localStorage alebo vráti hardcoded zoznam.
+         */
+        function loadUsers() {
+            const storedUsers = localStorage.getItem('registeredUsers');
+            const hardcoded = [
+                { nickname: 'GrooveVortex', password: 'password123' },
+                { nickname: 'BoosingBassTV', password: 'basshead' },
+                { nickname: 'DJ_Synth', password: 'future' }
+            ];
+            
+            if (storedUsers) {
+                try {
+                    const parsedStored = JSON.parse(storedUsers);
+                    // Filter zabezpečí, že hardcoded účty nebudú duplikované, ak boli uložené
+                    const uniqueStored = parsedStored.filter(
+                        su => !hardcoded.some(hu => hu.nickname === su.nickname)
+                    );
+                    return [...hardcoded, ...uniqueStored];
+                } catch (e) {
+                    console.error("Chyba pri parsovaní registrovaných užívateľov z localStorage:", e);
+                    return hardcoded;
+                }
+            }
+            return hardcoded;
+        }
+
+        /**
+         * Uloží aktuálny zoznam registrovaných používateľov do localStorage.
+         * Ukladáme iba tých, ktorí nie sú hardcoded.
+         */
+        function saveRegisteredUsers() {
+            const hardcodedNicknames = ['GrooveVortex', 'BoosingBassTV', 'DJ_Synth'];
+            const usersToSave = ALL_USERS.filter(u => !hardcodedNicknames.includes(u.nickname));
+            localStorage.setItem('registeredUsers', JSON.stringify(usersToSave));
+        }
+
+        /**
+         * Simuluje kontrolu nevhodného nickname.
+         */
+        function isNicknameValid(nickname) {
+            // Kontrola dĺžky
+            if (nickname.length < 3 || nickname.length > 20) return false;
+            // Kontrola povolených znakov (napr. len alfanumerické a podčiarkovník)
+            if (!/^[a-zA-Z0-9_]+$/.test(nickname)) return false; 
+
+            // Základná kontrola na nevhodné slová (simulácia)
+            const forbiddenWords = ['admin', 'root', 'test', 'fuck', 'shit', 'curseword', 'nepovoleny']; 
+            const lowerNickname = nickname.toLowerCase();
+            return !forbiddenWords.some(word => lowerNickname.includes(word));
+        }
+
+        /**
+         * Overí stav prihlásenia v localStorage, načíta používateľov a vykreslí príslušnú časť aplikácie.
+         */
+        function checkLoginStatus() {
+            // Načítanie používateľov pri štarte
+            ALL_USERS = loadUsers(); 
+            const userNickname = localStorage.getItem('userNickname');
+            renderApp(userNickname);
+        }
+
+        /**
+         * Renderuje UI na základe stavu prihlásenia.
+         */
+        function renderApp(nickname) {
+            const loginModal = document.getElementById('login-modal');
+            const mainContent = document.getElementById('main-content');
+            const headerStatus = document.getElementById('header-status');
+
+            if (nickname) {
+                // PRIHLÁSENÝ STAV
+                loginModal.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+                headerStatus.innerHTML = `
+                    <span class="text-green-400 mr-2">Online</span>
+                    | Prihlásený ako: 
+                    <span class="ml-1 text-purple-400 font-bold">${nickname}</span>
+                    <button onclick="handleLogout()" class="ml-4 px-3 py-1 bg-red-600 rounded-lg text-white text-xs hover:bg-red-500 transition">Odhlásiť</button>
+                `;
+                renderTracks(); 
+            } else {
+                // ODHLÁSENÝ STAV
+                loginModal.classList.remove('hidden');
+                mainContent.classList.add('hidden');
+                headerStatus.innerHTML = `
+                    <span class="text-red-400 mr-2">Offline</span>
+                    | Vyžaduje sa prihlásenie
+                `;
+                // Zabezpečí, že sa pri odhlásení vždy zobrazí Prihlásenie
+                showForm('login'); 
+            }
+        }
+
+        /**
+         * Prepína zobrazenie medzi prihlásením a registráciou.
+         */
+        window.showForm = (formType) => {
+            const loginForm = document.getElementById('form-login');
+            const registerForm = document.getElementById('form-register');
+            const loginTab = document.getElementById('tab-login');
+            const registerTab = document.getElementById('tab-register');
+            const message = document.getElementById('login-message');
+
+            message.textContent = ''; // Vyčistiť správy
+
+            if (formType === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                loginTab.classList.add('border-purple-500', 'text-purple-400');
+                loginTab.classList.remove('border-transparent', 'text-gray-400');
+                registerTab.classList.remove('border-purple-500', 'text-purple-400');
+                registerTab.classList.add('border-transparent', 'text-gray-400');
+            } else if (formType === 'register') {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                registerTab.classList.add('border-purple-500', 'text-purple-400');
+                registerTab.classList.remove('border-transparent', 'text-gray-400');
+                loginTab.classList.remove('border-purple-500', 'text-purple-400');
+                loginTab.classList.add('border-transparent', 'text-gray-400');
+            }
+        }
+
+
+        /**
+         * Spracuje prihlásenie.
+         */
+        window.handleLogin = (event) => {
+            event.preventDefault();
+            const nickname = document.getElementById('login-nickname').value.trim();
+            const password = document.getElementById('login-password').value;
+            const loginMessage = document.getElementById('login-message');
+
+            const user = ALL_USERS.find(u => u.nickname === nickname);
+
+            if (user && user.password === password) {
+                // ÚSPEŠNÉ PRIHLÁSENIE: Uloženie stavu do prehliadača
+                localStorage.setItem('userNickname', nickname);
+                loginMessage.textContent = 'Prihlásenie úspešné! Vstupujem do knižnice...';
+                loginMessage.className = 'text-center text-green-400 mt-4';
+                setTimeout(() => {
+                    renderApp(nickname);
+                }, 500);
+            } else {
+                // CHYBA PRI PRIHLÁSENÍ
+                loginMessage.textContent = 'Nesprávny Nickname alebo Heslo.';
+                loginMessage.className = 'text-center text-red-400 mt-4';
+                setTimeout(() => {
+                    loginMessage.textContent = '';
+                }, 3000);
+            }
+        }
+
+        /**
+         * Spracuje registráciu nového používateľa.
+         */
+        window.handleRegister = (event) => {
+            event.preventDefault();
+            const nickname = document.getElementById('reg-nickname').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const loginMessage = document.getElementById('login-message');
+
+            // 1. Kontrola platnosti Nickname
+            if (!isNicknameValid(nickname)) {
+                loginMessage.textContent = 'Nevhodný Nickname (použite 3-20 znakov, bez nevhodných slov a špeciálnych znakov).';
+                loginMessage.className = 'text-center text-red-400 mt-4';
+                setTimeout(() => { loginMessage.textContent = ''; }, 4000);
+                return;
+            }
+
+            // 2. Kontrola, či Nickname už existuje
+            if (ALL_USERS.find(u => u.nickname === nickname)) {
+                loginMessage.textContent = `Nickname '${nickname}' je už obsadený. Prepnite na Prihlásenie.`;
+                loginMessage.className = 'text-center text-red-400 mt-4';
+                setTimeout(() => { loginMessage.textContent = ''; }, 4000);
+                return;
+            }
+            
+            // Heslo je kontrolované aj v HTML (minlength), ale pre istotu
+            if (password.length < 6) {
+                loginMessage.textContent = 'Heslo musí mať aspoň 6 znakov.';
+                loginMessage.className = 'text-center text-red-400 mt-4';
+                setTimeout(() => { loginMessage.textContent = ''; }, 4000);
+                return;
+            }
+
+            // 3. Registrácia a uloženie
+            const newUser = { nickname, password };
+            ALL_USERS.push(newUser);
+            saveRegisteredUsers(); // Uloženie do localStorage
+
+            // 4. Prihlásenie nového používateľa
+            localStorage.setItem('userNickname', nickname);
+            loginMessage.textContent = `Registrácia úspešná! Nickname '${nickname}' bol vytvorený. Vstupujem...`;
+            loginMessage.className = 'text-center text-green-400 mt-4';
+            
+            // Vyčistíme formulár
+            document.getElementById('reg-nickname').value = '';
+            document.getElementById('reg-password').value = '';
+
+            setTimeout(() => {
+                renderApp(nickname);
+            }, 500);
+        }
+        
+        /**
+         * Spracuje odhlásenie.
+         */
+        window.handleLogout = () => {
+            localStorage.removeItem('userNickname');
+            renderApp(null);
+        }
+
+        /**
+         * Vykreslenie stôp do UI zo statického poľa musicData. (Zostáva nezmenené)
+         */
+        function renderTracks() {
+            const grid = document.getElementById('music-grid');
+            const loadingMessage = document.getElementById('loading-message');
+            grid.innerHTML = ''; // Vyčistíme existujúce karty
+
+            if (musicData.length === 0) {
+                loadingMessage.textContent = "Pole musicData v kóde je prázdne.";
+                grid.appendChild(loadingMessage);
+                document.getElementById('track-count').textContent = 0;
+                return;
+            }
+
+            // Skryjeme načítavaciu správu a aktualizujeme počítadlo
+            if (loadingMessage) loadingMessage.remove(); 
+            document.getElementById('track-count').textContent = musicData.length;
+            
+            // Triedenie: Najnovšie pridané hore
+            const sortedTracks = musicData.sort((a, b) => b.createdAt - a.createdAt);
+
+            sortedTracks.forEach((track, index) => {
+                const card = document.createElement('div');
+                // Použijeme index pre striedanie farieb (kozmetický detail)
+                const accentColor = index % 2 === 0 ? 'text-indigo-400' : 'text-purple-400';
+                const shadowClass = index % 2 === 0 ? 'shadow-indigo-500/20' : 'shadow-purple-500/20';
+
+                card.className = "vortex-card p-6 bg-gray-800 rounded-xl shadow-lg hover:bg-gray-700/50 transition duration-300 ease-in-out flex flex-col justify-between";
+                // Posielame celý objekt track
+                card.setAttribute('onclick', `showTrackDetail(${JSON.stringify(track).replace(/'/g, "\\'")})`); 
+
+                card.innerHTML = `
+                    <div>
+                        <!-- Ikona/Placeholder pre obal albumu -->
+                        <div class="h-16 w-16 mb-4 rounded-full flex items-center justify-center bg-gray-700/50 mx-auto border-2 ${accentColor} ${shadowClass} shadow-md">
+                            <svg class="w-8 h-8 ${accentColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v14m-6 2l6-3m-12 0v2m0-2h.01M9 15h.01M9 11h.01M9 7h.01"></path>
+                            </svg>
+                        </div>
+
+                        <h3 class="text-xl font-bold mb-2 text-white text-center">${track.title}</h3>
+                        <p class="text-sm ${accentColor} text-center font-medium">${track.artist}</p>
+                        <p class="text-xs text-gray-500 mt-3 italic text-center">Kódovaný dátum: ${new Date(track.createdAt).toLocaleDateString('sk-SK')}</p>
+                    </div>
+                    <div class="mt-4 text-center">
+                        <span class="inline-block px-3 py-1 text-xs font-semibold bg-indigo-600 rounded-full text-white">STATICKÉ DÁTA</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        /**
+         * Funkcia na zobrazenie detailu stopy v modálnom okne. (Zostáva nezmenená)
+         */
+        window.showTrackDetail = (track) => {
+            // Generovanie fiktívnych dát pre futuristický dojem
+            const fiktivnaDlzka = `${(Math.floor(Math.random() * 3) + 3)}:${(Math.floor(Math.random() * 60)).toString().padStart(2, '0')}`;
+            const fiktivneZanre = ["Synthwave", "Future Pop", "Ambient", "Cyberfunk", "A.I. Generated"];
+            const fiktivnyZaner = fiktivneZanre[Math.floor(Math.random() * fiktivneZanre.length)];
+
+            document.getElementById('modal-title').textContent = track.title;
+            document.getElementById('modal-artist').innerHTML = `Umelec: ${track.artist}`;
+            
+            // Text pre detaily
+            document.getElementById('modal-description').innerHTML = `
+                <p class="text-gray-300 mb-2">Simulované detaily skladby pre zážitok z knižnice:</p>
+                <ul class="list-disc list-inside ml-4 text-gray-400 text-sm">
+                    <li>Dĺžka: ${fiktivnaDlzka}</li>
+                    <li>Žáner: ${fiktivnyZaner}</li>
+                    <li>Dátum definovania: ${new Date(track.createdAt).toLocaleString('sk-SK')}</li>
+                    <li>Statické ID: ${track.id}</li>
+                </ul>
+            `;
+            
+            document.getElementById('detail-modal').classList.remove('hidden');
+        }
+
+        // Ostatné UI funkcie
+        window.closeModal = () => {
+            document.getElementById('detail-modal').classList.add('hidden');
+        }
+
+        window.scrollToSection = (id) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Inicializácia pri načítaní stránky
+        document.addEventListener('DOMContentLoaded', checkLoginStatus);
+    </script>
+</body>
+</html>
